@@ -1,0 +1,13 @@
+node_modules
+
+.vs/
+.vscode/
+.fusebox
+
+src/
+tsconfig.json
+
+*.spec.d.ts
+*.tgz
+*.log
+*.log.*

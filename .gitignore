@@ -1,0 +1,10 @@
+node_modules
+dist
+
+.vs/
+.vscode/
+.fusebox
+
+*.tgz
+*.log
+*.log.*

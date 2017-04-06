@@ -1,0 +1,1 @@
+export * from './ng2-template-plugin';

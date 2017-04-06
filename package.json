@@ -1,0 +1,32 @@
+{
+  "name": "ng2-fused",
+  "version": "0.1.0",
+  "description": "FuseBox plugins and utilities for building Angular2 applications.",
+  "author": "Alexander Klock",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alex-klock/ng2-fused"
+  },
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+    "test": "npm run build && jasmine JASMINE_CONFIG_PATH=jasmine.json"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^2.5.47",
+    "@types/node": "^7.0.12",
+    "jasmine": "^2.5.3",
+    "rimraf": "^2.6.1",
+    "typescript": "^2.2.2"
+  },
+  "keywords": [
+    "fusebox",
+    "fuse-box",
+    "ng2",
+    "angular2",
+    "plugin"
+  ]
+}
