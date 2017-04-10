@@ -6,6 +6,7 @@
         "outDir": "dist/",
         "declaration": true,
         "sourceMap": false,
+        "allowUnreachableCode": true,
         "pretty": true
     },
     "exclude": [

@@ -1,6 +1,6 @@
 {
   "name": "ng2-fused",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "FuseBox plugins and utilities for building Angular2 applications.",
   "author": "Alexander Klock",
   "repository": {
