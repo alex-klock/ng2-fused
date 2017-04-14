@@ -98,6 +98,7 @@ export function Ng2TemplatePlugin(options?: Ng2TemplatePluginOptions) {
  * Options that can be passed to the Ng2TemplatePlugin
  */
 export interface Ng2TemplatePluginOptions {
+    autoRequireStyles: boolean;
     /**
      * Whether or not to ignore converting styleUrls properties. Defaults to false.
      * 

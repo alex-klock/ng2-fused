@@ -94,7 +94,7 @@ export class Ng2RouterPluginClass {
     public parseLoadChildrenValue(loadChildren: string): LazyModuleInfo {
         let split = loadChildren.split('#');
         if (split.length < 2) {
-            throw new Error(`Unable to parse '${loadChildren}', not a valid loadChildren string.`);
+            return null;
         }
         let moduleSplit = split[1].split('?');
         let importPath = split[0];
@@ -144,6 +144,9 @@ export class Ng2RouterPluginClass {
     public transformSource(source: string): string {
         source = source.replace(this.loadChildrenPattern, (match, loadChildren: string) => {
             let moduleInfo = this.parseLoadChildrenValue(loadChildren);
+            if (!moduleInfo) {
+                return loadChildren;
+            }
             this.lazyModules[moduleInfo.moduleName] = moduleInfo;
             return this._insertLazyImport(moduleInfo);
         });
