@@ -65,7 +65,7 @@ export class ComponentContext {
             CallExpression: (node: any) => {
 
                 if (node.callee.name === 'Component' || (node.callee.type === 'MemberExpression' && node.callee.property.name === 'Component')) {
-                    let info = new ComponentInfo();
+                    let info = new ComponentInfo(this);
                     let objectExpression = node.arguments[0];
                     if (objectExpression) {
                         let properties = objectExpression.properties;

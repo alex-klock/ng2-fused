@@ -158,9 +158,9 @@ export class Ng2RouterPluginClass {
 
         return 'loadChildren: function () { return new Promise(function (resolve, reject) {' +
             `FuseBox.exists('${moduleInfo.importPath}') ? resolve(require('${moduleInfo.importPath}')['${moduleInfo.moduleName}']) : ` +
-            `FuseBox.import('${moduleInfo.loadPath}', (loaded) => loaded ? ` +
+            `FuseBox.import('${moduleInfo.loadPath}', function (loaded) { return loaded ? ` +
             `resolve(require('${moduleInfo.importPath}')['${moduleInfo.moduleName}']) : ` + 
-            `reject("Unable to load module '${moduleInfo.moduleName}' from '${moduleInfo.loadPath}'.")) }) }`;
+            `reject("Unable to load module '${moduleInfo.moduleName}' from '${moduleInfo.loadPath}'."); }) }) }`;
     }
 }
 

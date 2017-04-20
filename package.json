@@ -1,6 +1,6 @@
 {
   "name": "ng2-fused",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "FuseBox plugins and utilities for building Angular2 applications.",
   "author": "Alexander Klock",
   "repository": {
@@ -31,6 +31,8 @@
     "plugin"
   ],
   "dependencies": {
-    "@types/acorn": "^4.0.2"
+    "@types/acorn": "^4.0.2",
+    "acorn": "^4.0.3",
+    "escodegen": "^1.8.1"
   }
 }

@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as walk from 'acorn/dist/walk';
 import * as escodegen from 'escodegen';
+import { ComponentContext } from './component-context';
 
 /**
  * Represents information gathered about a component from analyzing its syntax tree.
@@ -10,13 +11,19 @@ import * as escodegen from 'escodegen';
  */
 export class ComponentInfo {
 
-    public filename: string;
-
-    public fullFilename: string;
+    public context: ComponentContext;
 
     public metadata: ComponentMetadata = {};
 
     public name: string;
+
+    constructor(context: ComponentContext) {
+        this.context = context;
+    }
+
+    public addMetadataProperty(name: string, value: any) {
+
+    }
 }
 
 /**
