@@ -70,10 +70,11 @@ export class Ng2RouterPluginClass {
     public init(context) {
         this.context = context;
     }
-
+/*
     public onTypescriptTransform(file) {
-        file.contents = this.transformSource(file.contents);
+        // file.contents = this.transformSource(file.contents);
     }
+    */
 
     /**
      * Implements FuseBox Plugin's onTypescriptTransform's method.  
@@ -155,11 +156,11 @@ export class Ng2RouterPluginClass {
 
     private _insertLazyImport(moduleInfo: LazyModuleInfo) {
 
-        return 'loadChildren: () => new Promise(function (resolve, reject) {' +
+        return 'loadChildren: function () { return new Promise(function (resolve, reject) {' +
             `FuseBox.exists('${moduleInfo.importPath}') ? resolve(require('${moduleInfo.importPath}')['${moduleInfo.moduleName}']) : ` +
             `FuseBox.import('${moduleInfo.loadPath}', (loaded) => loaded ? ` +
             `resolve(require('${moduleInfo.importPath}')['${moduleInfo.moduleName}']) : ` + 
-            `reject("Unable to load module '${moduleInfo.moduleName}' from '${moduleInfo.loadPath}'.")) })`;
+            `reject("Unable to load module '${moduleInfo.moduleName}' from '${moduleInfo.loadPath}'.")) }) }`;
     }
 }
 

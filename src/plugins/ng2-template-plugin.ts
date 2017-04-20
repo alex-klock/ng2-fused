@@ -1,4 +1,6 @@
+import { ComponentContext } from './../components/component-context';
 import * as path from 'path';
+import * as escodegen from 'escodegen';
 
 /**
  * Plugin that allows the replacement of templateUrl and styleUrls from strings to require statements.
@@ -8,78 +10,90 @@ import * as path from 'path';
  */
 export class Ng2TemplatePluginClass {
     
-    public get ignoreStyleUrls(): boolean {
-        return this.options.ignoreStyleUrls;
-    }
-
-    public get ignoreTemplateUrl(): boolean {
-        return this.options.ignoreTemplateUrl;
-    }
-
     public options: Ng2TemplatePluginOptions;
 
-    public get templateUrlPattern(): RegExp {
-        return this.options.templateUrlPattern;
-    }
-
-    public get styleUrlsPattern(): RegExp {
-        return this.options.styleUrlsPattern;
-    }
-
-    public get urlStringPattern(): RegExp {
-        return this.options.urlStringPattern;
-    }
+    public test: RegExp|string = /\.(j|t)s(x)?$/;
 
     constructor(options?: Ng2TemplatePluginOptions) {
         this.options = Object.assign({
+            autoRequireStyles: true,
+            autoRequireTemplates: true,
             templateUrlPattern: /templateUrl\s*:(\s*['"`](.*?)['"`]\s*([,}]))/gm,
             styleUrlsPattern: /styleUrls *:(\s*\[[^\]]*?\])/g,
             urlStringPattern: /(['`"])((?:[^\\]\\\1|.)*?)\1/g
         }, options);
+        if (options && options.test) {
+            this.test = options.test;
+        }
+
     }
-        
+
+    public init(context) {
+
+    }
+
     /**
-     * Implements FuseBox Plugin's onTypescriptTransform 's method.  
+     * Implements FuseBox Plugin's transform's method.  
      * 
      * @param {any} file 
      * @returns 
      */
-    public onTypescriptTransform(file) {      
-        file.contents = this.transformSource(file.contents);
-    }
+    public transform(file) {
+        let componentContext = new ComponentContext(file);
+        let modified = false;
 
-    /**
-     * Converts urls in a given input string to commonjs require expressions.
-     * 
-     * @param {string} input 
-     * @returns {string} 
-     */
-    public replaceUrls(input: string): string {
-        return input.replace(this.urlStringPattern, function (match, quote, url) {
-            if (url[0] !== '.') {
-                url = './' + url;
+        for (let component of componentContext.components) {
+            if (!this.options.ignoreTemplateUrl) {
+                if (component.metadata.templateUrl) {
+                    if (component.metadata.templateUrl.node.key.name !== 'template') {
+                        let value = component.metadata.templateUrl.value;
+
+                        component.metadata.templateUrl.node.key.name = 'template';
+                        component.metadata.templateUrl.node.value = {
+                            type: 'CallExpression',
+                            callee: {
+                                type: 'Identifier',
+                                name: 'require'
+                                
+                            },
+                            arguments: [{
+                                type: 'Literal',
+                                value: value
+                            }]
+                        };
+                        file.analysis.dependencies.push(value);
+                        modified = true;
+                    }
+                }
             }
-            return `require('${url}')`;
-        });
-    }
 
-    /**
-     * Transforms the source by searching for template and style urls and converting them to require statements.
-     * 
-     * @param {string} source 
-     */
-    public transformSource(source: string): string {
-        if (!this.ignoreTemplateUrl) {
-            source = source.replace(this.templateUrlPattern, (match, url) => {
-                return 'template:' + this.replaceUrls(url);
-            });
+            if (!this.options.ignoreStyleUrls) {
+                if (component.metadata.styleUrls) {
+                    let node = component.metadata.styleUrls.node;
+                    if (node.key.name !== 'styles') {
+                        node.key.name = 'styles';
+                        if (node.value.type === 'ArrayExpression') {
+                            for (let i = 0; i < node.value.elements.length; i++) {
+                                let value = node.value.elements[i].value;
+
+                                node.value.elements[i] = { 
+                                    type: 'CallExpression', 
+                                    callee: { type: 'Identifier', name: 'require' }, 
+                                    arguments: [{ type: 'Literal', value: value }] 
+                                };
+                                file.analysis.dependencies.push(value);
+                                modified = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
         }
-        if (!this.ignoreStyleUrls) {
-            source = source.replace(this.styleUrlsPattern, (match, urls) => {
-                return 'styles:' + this.replaceUrls(urls);
-            });
+
+        if (modified) {
+            file.contents = escodegen.generate(file.analysis.ast);
         }
-        return source;
     }
 }
 
@@ -98,7 +112,18 @@ export function Ng2TemplatePlugin(options?: Ng2TemplatePluginOptions) {
  * Options that can be passed to the Ng2TemplatePlugin
  */
 export interface Ng2TemplatePluginOptions {
-    autoRequireStyles: boolean;
+    /**
+     * Whether or not to automatically require styles with matching filenames in the same folder location. Defaults to true.
+     * 
+     * @type {boolean}
+     */
+    autoRequireStyles?: boolean;
+    /**
+     * Whether or not to automatically require templates with matching filenames in the same folder location. Defaults to true.
+     * 
+     * @type {boolean}
+     */
+    autoRequireTemplates?: boolean;
     /**
      * Whether or not to ignore converting styleUrls properties. Defaults to false.
      * 
@@ -114,24 +139,10 @@ export interface Ng2TemplatePluginOptions {
      */
     ignoreTemplateUrl?: boolean;
     /**
-     * The regex pattern to search for the 'templateUrl' property in component metadata.
+     * The test property for FuseBox plugins. Can be a regular expression or a string for a simplified regexp.
+     * Defaults to '*.ts$|*.js$'.
      * 
-     * @type {RegExp}
-     * @memberOf Ng2TemplatePluginOptions
+     * @type {(RegExp|string)}
      */
-    templateUrlPattern?: RegExp;
-    /**
-     * The regex pattern to search for the 'styleUrls' property in component metadata.
-     * 
-     * @type {RegExp}
-     * @memberOf Ng2TemplatePluginOptions
-     */
-    styleUrlsPattern?: RegExp;
-    /**
-     * The regex pattern to grab the string url within templateUrl and styleUrls properties.
-     * 
-     * @type {RegExp}
-     * @memberOf Ng2TemplatePluginOptions
-     */
-    urlStringPattern?: RegExp;
+    test?: RegExp|string;
 }

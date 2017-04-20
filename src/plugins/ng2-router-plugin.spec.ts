@@ -12,7 +12,7 @@ describe('Ng2RouterPlugin', () => {
 
         it('should transform the loadChildren property from a string to a function returning a Promise', () => {
             expect(plugin.transformSource(`{ path: 'lazy', loadChildren: './+lazy/lazy.module#LazyModule' }`))
-                .toContain('loadChildren: () => new Promise(function (resolve, reject) {');
+                .toContain('loadChildren: function () { return new Promise(function (resolve, reject) {');
         });
     });
 });
