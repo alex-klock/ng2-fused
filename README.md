@@ -7,6 +7,8 @@
 npm install ng2-fused --save-dev
 ```
 
+[![NPM](https://nodei.co/npm/fuse-box.png?downloads=true)](https://nodei.co/npm/fuse-box/)
+
 ## Ng2TemplatePlugin
 
 Wraps url strings for templateUrl and styleUrls inside of require statements.  Inspired by [angular2-template-loader](https://github.com/TheLarkInn/angular2-template-loader) for webpack.
