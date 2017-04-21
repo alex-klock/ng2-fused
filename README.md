@@ -7,7 +7,7 @@
 npm install ng2-fused --save-dev
 ```
 
-[![NPM](https://nodei.co/npm/fuse-box.png?downloads=true)](https://nodei.co/npm/fuse-box/)
+[![NPM](https://nodei.co/npm/ng2-fused.png?downloads=true)](https://nodei.co/npm/ng2-fused/)
 
 ## Ng2TemplatePlugin
 
