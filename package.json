@@ -1,6 +1,6 @@
 {
   "name": "ng2-fused",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "FuseBox plugins and utilities for building Angular2 applications.",
   "author": "Alexander Klock",
   "repository": {
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/jasmine": "^2.5.47",
     "@types/node": "^7.0.12",
-    "fuse-box": "^1.3.131",
+    "fuse-box": "^2.0.0",
     "jasmine": "^2.5.3",
     "rimraf": "^2.6.1",
     "typescript": "^2.2.2"

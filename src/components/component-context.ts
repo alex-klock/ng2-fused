@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as walk from 'acorn/dist/walk';
 import * as escodegen from 'escodegen';
-import { ComponentInfo, MetadataProperty } from './component-info';
+import { ComponentInfo, MetadataProperty } from './';
 
 /**
  * Represents a file that contains one or more components in it.
@@ -17,6 +17,10 @@ export class ComponentContext {
      * @type {Ng2ComponentInfo[]}
      */
     public components: ComponentInfo[] = [];
+
+    public directory: string;
+
+    public fileExtension: string;
 
     public filename: string;
 
@@ -43,8 +47,11 @@ export class ComponentContext {
     }
 
     constructor (file: { absPath: string, contents: string, analysis: any, loadContents() }) {
+        let parsedPath = path.parse(file.absPath);
+        this.directory = parsedPath.dir;
         this.fullFilePath = file.absPath;
-        this.filename = path.basename(file.absPath);
+        this.filename = parsedPath.base;
+        this.fileExtension = parsedPath.ext;
 
         if (file.absPath.indexOf('.spec.') !== -1) {
             return null;
@@ -67,17 +74,10 @@ export class ComponentContext {
                 if (node.callee.name === 'Component' || (node.callee.type === 'MemberExpression' && node.callee.property.name === 'Component')) {
                     let info = new ComponentInfo(this);
                     let objectExpression = node.arguments[0];
-                    if (objectExpression) {
-                        let properties = objectExpression.properties;
-                        if (properties) {
-                            for (let property of properties) {
-                                let metadata = new MetadataProperty(property);
-                                info.metadata[metadata.key] = metadata;
-                            }
-                            
-                            this.components.push(info);
-                        }
-                    }
+
+                    info.metadataNode = objectExpression;
+
+                    this.components.push(info);
                 }
             }
         });

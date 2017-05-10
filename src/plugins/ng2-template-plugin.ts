@@ -1,4 +1,6 @@
+import { ComponentInfo } from './../components/component-info';
 import { ComponentContext } from './../components/component-context';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as escodegen from 'escodegen';
 
@@ -25,7 +27,6 @@ export class Ng2TemplatePluginClass {
         if (options && options.test) {
             this.test = options.test;
         }
-
     }
 
     public init(context) {
@@ -44,56 +45,44 @@ export class Ng2TemplatePluginClass {
 
         for (let component of componentContext.components) {
             if (!this.options.ignoreTemplateUrl) {
-                if (component.metadata.templateUrl) {
-                    if (component.metadata.templateUrl.node.key.name !== 'template') {
-                        let value = component.metadata.templateUrl.value;
-
-                        component.metadata.templateUrl.node.key.name = 'template';
-                        component.metadata.templateUrl.node.value = {
-                            type: 'CallExpression',
-                            callee: {
-                                type: 'Identifier',
-                                name: 'require'
-                                
-                            },
-                            arguments: [{
-                                type: 'Literal',
-                                value: value
-                            }]
-                        };
-                        file.analysis.dependencies.push(value);
-                        modified = true;
-                    }
+                let templateUrl = component.metadata.templateUrl;
+                if (templateUrl && typeof templateUrl.value === 'string') {
+                    let oldValue = templateUrl.convertValueToRequireExpression();
+                    component.renameMetadataProperty('templateUrl', 'template');
+                    file.analysis.dependencies.push(oldValue);
+                    modified = true;
                 }
             }
-
-            if (!this.options.ignoreStyleUrls) {
-                if (component.metadata.styleUrls) {
-                    let node = component.metadata.styleUrls.node;
-                    if (node.key.name !== 'styles') {
-                        node.key.name = 'styles';
-                        if (node.value.type === 'ArrayExpression') {
-                            for (let i = 0; i < node.value.elements.length; i++) {
-                                let value = node.value.elements[i].value;
-
-                                node.value.elements[i] = { 
-                                    type: 'CallExpression', 
-                                    callee: { type: 'Identifier', name: 'require' }, 
-                                    arguments: [{ type: 'Literal', value: value }] 
-                                };
-                                file.analysis.dependencies.push(value);
-                                modified = true;
-                            }
-                        }
-                    }
-                }
+            if (this.requireStyles(component, file)) {
+                modified = true;
             }
-            
         }
 
         if (modified) {
             file.contents = escodegen.generate(file.analysis.ast);
         }
+    }
+
+    public requireStyles(component: ComponentInfo, file): boolean {
+        if (!this.options.ignoreStyleUrls) {
+            let styleUrls = component.metadata.styleUrls;
+            if (styleUrls) {
+                let oldValues = styleUrls.convertValueToRequireExpression();
+                component.renameMetadataProperty('styleUrls', 'styles');
+                if (oldValues) {
+                    for (let url of oldValues) {
+                        file.analysis.dependencies.push(url);
+                    }
+                }
+                return true;
+            }
+/*
+            if (!component.hasMetadataProperty('styles') && this.options.autoRequireStyles) {
+                
+            }
+*/
+        }
+        return false;
     }
 }
 
