@@ -109,13 +109,11 @@ export class Ng2RouterPluginClass {
             }
         }
         let moduleFileName = path.basename(importPath);
-        let outFolder: string;
+        let outFolder: string = this.options.publicPath;
 
-        if (this.context && this.context.outFile) {
-            if (this.options.publicPath) {
-                outFolder = this.options.publicPath;
-            } else {
-                outFolder = path.dirname(this.context.outFile.replace(process.cwd(), ''));
+        if (this.context && this.context.output) {
+            if (!this.options.publicPath) {
+                outFolder = this.context.output.dir;
             }
         }
 
@@ -155,7 +153,6 @@ export class Ng2RouterPluginClass {
     }
 
     private _insertLazyImport(moduleInfo: LazyModuleInfo) {
-
         return 'loadChildren: function () { return new Promise(function (resolve, reject) {' +
             `FuseBox.exists('${moduleInfo.importPath}') ? resolve(require('${moduleInfo.importPath}')['${moduleInfo.moduleName}']) : ` +
             `FuseBox.import('${moduleInfo.loadPath}', function (loaded) { return loaded ? ` +
