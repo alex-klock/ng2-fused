@@ -1,7 +1,8 @@
 import * as path from 'path';
 import * as walk from 'acorn/dist/walk';
 import * as escodegen from 'escodegen';
-import { ComponentInfo, MetadataProperty } from './';
+import { ComponentInfo } from './';
+import { MetadataProperty } from '../core/metadata-property'
 
 /**
  * Represents a file that contains one or more components in it.

@@ -1,26 +1,17 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import * as walk from 'acorn/dist/walk';
-import * as escodegen from 'escodegen';
-import { ComponentContext } from './component-context';
+import { NgContext } from './ng-context';
 import { MetadataProperty } from './metadata-property';
 
-/**
- * Represents information gathered about a component from analyzing its syntax tree.
- * 
- * @export
- * @class ComponentInfo
- */
-export class ComponentInfo {
+export class NgContextItem {
 
-    public context: ComponentContext;
+    public context: NgContext;
 
     public get directory(): string {
         return this.context ? path.dirname(this.context.fullFilePath) : null;
     }
 
-    public metadata: ComponentMetadata;
-
+    public metadata: NgMetadata = {};
+    
     /**
      * Gets or sets the metadata node (ObjectExpression type node).
      */
@@ -46,11 +37,11 @@ export class ComponentInfo {
 
     private _metadataNode;
 
-    constructor(context: ComponentContext) {
+    constructor(context: NgContext) {
         this.context = context;
     }
 
-    public addMetadataProperty(name: string, value: any) {
+    public addMetadataProperty(name: string, value: any): MetadataProperty {
         if (!this._metadataNode || !name || !value) {
             return;
         }
@@ -61,8 +52,8 @@ export class ComponentInfo {
         let node = {
             type: 'Property',
             key: {
-                type: 'Literal',
-                value: name
+                type: 'Identifier',
+                name: name
             },
             kind: 'init',
             value: null
@@ -87,13 +78,7 @@ export class ComponentInfo {
 
         this._metadataNode.properties.push(node);
         this.metadata[name] = new MetadataProperty(node);
-    }
-
-    /**
-     * Gets all related files in the same directory as the component (filename matches everything except extension of the component's filename).
-     */
-    public getRelatedFiles(): string[] {
-        return fs.readdirSync(this.directory).filter(f => path.parse(f).name === path.parse(this.context.filename).name);
+        return this.metadata[name];
     }
 
     public hasMetadataProperty(propertyName: string): boolean {
@@ -133,13 +118,8 @@ export class ComponentInfo {
  * Represents information extracted from a component's metadata bindings. ie @Component({ templateUrl: 'value' }).
  * 
  * @export
- * @interface ComponentMetadata
+ * @interface NgMetadata
  */
-export interface ComponentMetadata {
-    template?: MetadataProperty;
-    templateUrl?: MetadataProperty;
-    styles?: MetadataProperty;
-    styleUrls?: MetadataProperty;
+export interface NgMetadata {
     [metadataName: string]: MetadataProperty;
 }
-

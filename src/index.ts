@@ -1,4 +1,5 @@
-export * from './plugins/ng2-router-plugin';
-export * from './plugins/ng2-template-plugin';
-export * from './components/component-context';
-export * from './components/component-info';
+export * from './bundling/plugins/ng2-router-plugin';
+export * from './bundling/plugins/ng2-template-plugin';
+export * from './analysis/components/component-context';
+export * from './analysis/components/component-info';
+export { NgBuildConfig } from './bundling/ng-build-config';

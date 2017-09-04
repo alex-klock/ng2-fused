@@ -1,5 +1,5 @@
-import { ComponentInfo } from './../components/component-info';
-import { ComponentContext } from './../components/component-context';
+import { ComponentInfo } from '../../analysis/components/component-info';
+import { ComponentContext } from '../../analysis/components/component-context';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as escodegen from 'escodegen';
@@ -42,7 +42,7 @@ export class Ng2TemplatePluginClass {
     public transform(file) {
         let componentContext = new ComponentContext(file);
         let modified = false;
-
+        
         for (let component of componentContext.components) {
             if (!this.options.ignoreTemplateUrl) {
                 let templateUrl = component.metadata.templateUrl;
