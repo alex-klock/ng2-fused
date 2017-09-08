@@ -1,4 +1,4 @@
-import { WorkFlowContext } from 'fuse-box';
+import { Plugin, WorkFlowContext } from 'fuse-box';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as escodegen from 'escodegen';
@@ -10,7 +10,7 @@ import { NgContext } from '../../analysis/core/ng-context';
  * @export
  * @class Ng2LazyPlugin
  */
-export class Ng2RouterPluginClass {
+export class Ng2RouterPluginClass implements Plugin {
 
     public dependencies: string[];
 
@@ -60,7 +60,7 @@ export class Ng2RouterPluginClass {
      */
     public options: Ng2RouterPluginOptions;
 
-    public test: RegExp|string = /\.module\.(ngfactory\.)?(ts|js)$/
+    public test: RegExp = /\.module\.(ngfactory\.)?(ts|js)$/
 
     /**
      * Creates an instance of Ng2LazyPluginClass.
@@ -75,7 +75,7 @@ export class Ng2RouterPluginClass {
             vendorBundle: 'vendors'
         }, options);
         if (options && options.test) {
-            this.test = options.test;
+            this.test = <any> options.test;
         }
     }
 

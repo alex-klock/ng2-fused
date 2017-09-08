@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/jasmine": "^2.5.47",
     "@types/node": "^7.0.12",
-    "fuse-box": "^2.2.1",
+    "fuse-box": "^2.2.31",
     "jasmine": "^2.5.3",
     "rimraf": "^2.6.1",
     "typescript": "^2.4.2"

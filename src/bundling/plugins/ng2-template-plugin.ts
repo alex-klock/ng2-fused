@@ -1,3 +1,4 @@
+import { Plugin } from 'fuse-box';
 import { ComponentInfo } from '../../analysis/components/component-info';
 import { ComponentContext } from '../../analysis/components/component-context';
 import * as fs from 'fs';
@@ -10,11 +11,11 @@ import * as escodegen from 'escodegen';
  * @export
  * @class Ng2TemplatePlugin
  */
-export class Ng2TemplatePluginClass {
+export class Ng2TemplatePluginClass implements Plugin {
     
     public options: Ng2TemplatePluginOptions;
 
-    public test: RegExp|string = /\.(j|t)s(x)?$/;
+    public test: RegExp = /\.(j|t)s(x)?$/;
 
     constructor(options?: Ng2TemplatePluginOptions) {
         this.options = Object.assign({
@@ -25,7 +26,7 @@ export class Ng2TemplatePluginClass {
             urlStringPattern: /(['`"])((?:[^\\]\\\1|.)*?)\1/g
         }, options);
         if (options && options.test) {
-            this.test = options.test;
+            this.test = <any> options.test;
         }
     }
 

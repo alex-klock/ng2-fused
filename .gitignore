@@ -5,6 +5,8 @@ dist
 .vscode/
 .fusebox
 
+package-lock.json
+
 *.tgz
 *.log
 *.log.*
