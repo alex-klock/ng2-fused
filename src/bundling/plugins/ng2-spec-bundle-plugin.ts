@@ -52,11 +52,18 @@ export class Ng2SpecBundlePluginClass implements Plugin {
      * @memberof Ng2SpecBundlePluginClass
      */
     public transform(file: File) {
-        file.loadContents();
+        if (!file.analysis.ast) {
+            file.loadContents();
+            file.analysis.parseUsingAcorn();
+            file.analysis.analyze();
+        }
+        file.contents = '';
         for (let spec of this.specs) {    
             let fusePath = spec.substr(0, spec.length - 3);
+            let specFusePath = this.options.specPathPrefix + fusePath;
             file.contents += `
-            require('${this.options.specPathPrefix}${fusePath}');`;
+            require('${specFusePath}');`;
+            file.analysis.dependencies.push(specFusePath);
         }
     }
     

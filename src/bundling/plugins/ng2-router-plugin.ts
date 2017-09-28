@@ -186,15 +186,19 @@ export class Ng2RouterPluginClass implements Plugin {
                             kind: 'init' 
                         }]});
                     
-                    file.contents = `var ${this.ngModuleLoaderName} = require("${this.ngModuleLoaderPath}").${this.ngModuleLoaderName};
-                    var NgModuleFactoryLoader = require("@angular/core").NgModuleFactoryLoader;
-                    ` + escodegen.generate(file.analysis.ast);
+                    if (file.contents.indexOf(`require("${this.ngModuleLoaderPath}")`) === -1) {
+                        file.contents = `var ${this.ngModuleLoaderName} = require("${this.ngModuleLoaderPath}").${this.ngModuleLoaderName};
+                        var NgModuleFactoryLoader = require("@angular/core").NgModuleFactoryLoader;
+                        ` + escodegen.generate(file.analysis.ast);
+                    }
                     return;
                 }
                 
             }
-            file.contents = `var ${this.ngModuleLoaderName} = require("${this.ngModuleLoaderPath}").${this.ngModuleLoaderName};
-            ` + file.contents;
+            if (file.contents.indexOf(`require("${this.ngModuleLoaderPath}")`) === -1) {
+                file.contents = `var ${this.ngModuleLoaderName} = require("${this.ngModuleLoaderPath}").${this.ngModuleLoaderName};
+                ` + file.contents;
+            }
         }
     }
 
