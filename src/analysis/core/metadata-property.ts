@@ -13,7 +13,7 @@ export class MetadataProperty {
 
     public get value(): string {
         if (this.node.value.type === 'ArrayExpression') {
-            this.node.value.elements.filter(node => node.type === 'Identifier').map(node => node.value);
+            return this.node.value.elements.filter(node => node.type === 'Identifier').map(node => node.value);
         }
         // type: Identifier
         return this.node.value.value;
@@ -29,6 +29,21 @@ export class MetadataProperty {
     constructor(propertyNode) {
         // type: Property, kind: init
         this.node = propertyNode;
+    }
+
+    public addIdentifierValue(identifierName: string) {
+        if (this.node.value.type === 'ArrayExpression') {
+            this.node.value.elements.push({
+                type: 'Identifier',
+                name: identifierName
+            });
+        }
+    }
+
+    public addValue(node) {
+        if (this.node.value.type === 'ArrayExpression') {
+            this.node.value.elements.push(node);
+        }
     }
 
     /**

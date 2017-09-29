@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "target": "es6",
@@ -10,7 +12,8 @@
         "pretty": true
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "modules"
     ],
     "compileOnSave": true
 }

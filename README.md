@@ -1,5 +1,5 @@
 # ng2-fused
-[FuseBox](http://fuse-box.org/) plugins and utilities for building Angular2 applications.
+[FuseBox](http://fuse-box.org/) plugins and utilities for building Angular2 applications. Templating, Lazy Loaded Modules, and Spec Bundle support.
 
 ## Installation
 
@@ -8,6 +8,8 @@ npm install ng2-fused --save-dev
 ```
 
 [![NPM](https://nodei.co/npm/ng2-fused.png?downloads=true)](https://nodei.co/npm/ng2-fused/)
+
+Check out the [ng2-fused-seed](https://github.com/alex-klock/ng2-fused-seed) project for a working starter project utilizing the following plugins.
 
 ## Ng2TemplatePlugin
 
@@ -34,7 +36,9 @@ const fuse = FuseBox.init({
     ]
 });
 
-fuse.devServer('> main.ts');
+...
+
+fuse.run();
 ```
 
 
@@ -85,11 +89,13 @@ plugins: [
 
 ## Ng2RouterPlugin
 
-Converts Angular2 lazy loaded routes within loadChildren properties to a Promise that calls FuseBox's lazy import of a module. Inspired by [angular2-router-loader](https://github.com/brandonroberts/angular-router-loader) for webpack.
+** O.5 Breaking Changes ** - Version 0.5 changed the behaviour of this plugin to better work for both JIT and AOT builds.
+
+Converts Angular2 lazy loaded routes within loadChildren properties utilize a custom NgModuleFactoryLoader that works with FuseBox bundles (even ones bundled with the Quantum plugin).  Also has a utility that will automatically configure FuseBox to automatically code split modules based on folder naming conventions (module folders beginning with "+"). Inspired by [angular2-router-loader](https://github.com/brandonroberts/angular-router-loader) for webpack.
 
 ### Usage
 
-The plugin should be configured with the `publicPath` option, which will be prepended to the module's name.
+The plugin should be configured as a top level plugin.
 
 ```javascript
 const { FuseBox } = require('fuse-box');
@@ -98,41 +104,17 @@ const { Ng2RouterPlugin } = require('ng2-fused');
 const fuse = FuseBox.init({
     homeDir: './src',
     plugins: [
-        Ng2RouterPlugin({
-            publicPath: '/assets/js'
-        }),
+        Ng2RouterPlugin({ 
+            aot: config.aot,
+            autoSplitBundle: 'app',
+            vendorBundle: 'vendors'
+        })      
     ]
 });
 
-fuse.devServer('> main.ts');
-```
+...
 
-
-### Before Transform...
-
-```typescript
-import { RouterModule, Routes } from '@angular/router';
-
-export const routes: Routes = [
-    { path: 'lazy', loadChildren: '~/app/lazy/lazy.module#LazyModule' }
-];
-```
-
-### After Transform...
-
-```typescript
-import { RouterModule, Routes } from '@angular/router';
-
-export const routes: Routes = [
-    { path: 'lazy', loadChildren: () => new Promise(function (resolve, reject) {
-            FuseBox.exists('~/app/lazy/lazy.module') ? resolve(require('~/app/lazy/lazy.module')['LazyModule']) : 
-                FuseBox.import('/assets/js/bundle-lazy.module.js', (loaded) => loaded ? 
-                    resolve(require('~/app/lazy/lazy.module')['LazyModule']) :
-                    reject('Unable to load module \'LazyModule\' from \'/assets/js/bundle-lazy.module.js\'.')) 
-                })
-        }) 
-    }
-];
+fuse.run();
 ```
 
 ### Options
@@ -140,22 +122,47 @@ export const routes: Routes = [
 You can tweak the plugin with the following options:
 
 <dl>
-    <dt>bundleName</dt>
-    <dd>Optional fn, if set the generated bundle name is created from this. Other bundle naming properties (bundlePrefix, bundleSuffix, etc) are ignored..</dd>
-    <dt>bundlePrefix</dt>
-    <dd>Prefix to add to the generated bundle filename.  Defaults to 'bundle-'.</dd>
-    <dt>bundleSuffix</dt>
-    <dd>Suffix to add to the generated bundle filename.  Defaults to ''. </dd>
-    <dt>loadChildrenPattern</dt>
-    <dd>The regex pattern used to find the loadChildren string.</dd>
-    <dt>publicPath</dt>
-    <dd>The public url folder path that the generated bundles should be generated from.</dd>
+    <dt>aot</dt>
+    <dd>Optional flag letting the plugin know whether or not this is an AOT build. Utilized to automatically handle module imports to look for .ngfactory extensions.</dd>
+    <dt>aotAppPath</dt>
+    <dd>The root app folder when building in aot build. Defaults to 'aot/app'.</dd>
+    <dt>appPath</dt>
+    <dd>The root app path folder. Defaults to 'app'. </dd>
+    <dt>autoSplitBundle</dt>
+    <dd>The name of the bundle to perform auto splitting on.  If not set, auto splitting will be disabled.</dd>
 </dl>
 
 ### Issues...
 
-Currently the loadChildren property must be used with `~` root indicator, relative paths with '.' will not work.
+Currently the switching between AOT and JIT sometimes causes issues when FuxeBox's cache is used.  As a workaround, when a build is executed, the cache folder is first deleted.
+
+## Ng2SpecBundlePlugin
+
+This plugin allows for the creation of a spec bundle file that imports all spec files found in the project.  This is more so required if using the QuantumPlugin.  It should be used as a plugin for ONLY the bundle that the specs should be provided in.
+
+```
+fuse.bundle('app')
+    .plugin(Ng2SpecBundlePlugin())
+    ...
+```
+
+By default this plugin tests for the file `/spec-bundle\.(ts|js)$/`, if you wish for your spec bundle file to be named something different then you'll have to change this.
+
+### Options
+
+<dl>
+    <dt>cwd</dt>
+    <dd>The path search for specs in, used for glob searching for spec files. Defaults to `"build/workspace"`.<dd>
+    <dt>specPathPrefix<dt>
+    <dd>Defaults to '../', used as a prefix to the spec file paths.<dd>
+    <dt>specPattern<dt>
+    <dd>Glob pattern for finding specs. Defaults to `"**/*.spec.ts"`</dd>
+</dl>
 
 ## Roadmap
 
-* Auto bundle creation of lazy loaded routes found by Ng2RouterPlugin
+* Auto import of html and css for components if files are found in folder structure.
+* More unit tests.
+* More samples.
+
+For a seed project utilizing FuseBox and Ng2Fused, check out https://github.com/alex-klock/ng2-fused-seed.
