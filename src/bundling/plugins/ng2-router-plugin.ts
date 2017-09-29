@@ -305,7 +305,7 @@ export interface Ng2RouterPluginOptions {
     appPath?: string;
 
     /**
-     * Whether or not to automatically configure the bundle to split based on file structure.
+     * The name of the bundle to perform auto splitting on.  If not set, auto splitting will be disabled.
      */
     autoSplitBundle?: string;
 
