@@ -9,7 +9,7 @@ npm install ng2-fused --save-dev
 
 [![NPM](https://nodei.co/npm/ng2-fused.png?downloads=true)](https://nodei.co/npm/ng2-fused/)
 
-Check out the [ng2-fused-seed](https://github.com/alex-klock/ng2-fused-seed) project for a working starter project utilizing the following plugins.
+Check out the [ng2-fused-seed](https://github.com/alex-klock/ng2-fused-seed) project for a working starter project utilizing the following plugins.  Or [fusebox-angular-universal-starter](https://github.com/patrickmichalina/fusebox-angular-universal-starter) for a fully featured angular2 seed.
 
 ## Ng2TemplatePlugin
 
@@ -165,4 +165,4 @@ By default this plugin tests for the file `/spec-bundle\.(ts|js)$/`, if you wish
 * More unit tests.
 * More samples.
 
-For a seed project utilizing FuseBox and Ng2Fused, check out https://github.com/alex-klock/ng2-fused-seed.
+For a seed project utilizing FuseBox and Ng2Fused, check out https://github.com/alex-klock/ng2-fused-seed or https://github.com/patrickmichalina/fusebox-angular-universal-starter.

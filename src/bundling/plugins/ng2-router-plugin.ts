@@ -2,6 +2,7 @@ import { Plugin, WorkFlowContext } from 'fuse-box';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as escodegen from 'escodegen';
+import * as glob from 'glob';
 import { NgContext } from '../../analysis/core/ng-context';
 
 /**
@@ -67,10 +68,11 @@ export class Ng2RouterPluginClass implements Plugin {
      * @param {Ng2LazyPluginOptions} [options] 
      */
     constructor(options?: Ng2RouterPluginOptions) {
-        this.options = Object.assign({
+        this.options = Object.assign(<Ng2RouterPluginOptions> {
             appPath: 'app',
             aotAppPath: 'aot/app',
             autoSplitBundle: 'app',
+            lazyModulePattern: '**/+*/!(*-route*|*-routing*).module.?(ngfactory.){ts,js}',
             loadChildrenPattern: /loadChildren[\s]*:[\s]*['|"](.*?)['|"]/gm,
             vendorBundle: 'vendors'
         }, options);
@@ -92,39 +94,19 @@ export class Ng2RouterPluginClass implements Plugin {
             return;
         }
 
+        let homeDir = 'build/workspace';
         let fusePath = this.options.aot ? this.options.aotAppPath : this.options.appPath;
-        let modulesRoot = path.join(context.homeDir, fusePath);
-        
-        let files = fs.readdirSync(modulesRoot);
+        let modulePattern = path.posix.join(fusePath, this.options.lazyModulePattern);
+
+        let files: string[] = glob.sync(modulePattern, { cwd: context.homeDir });
+        files.sort((a, b) => {
+            let a1 = a.split('/').length;
+            let b1 = b.split('/').length;
+            return a1 > b1 ? 1 : a1 < b1 ? -1 : 0;
+        });
         for (let file of files) {
-            let featurePath = path.join(modulesRoot, file);
-            let stat = fs.statSync(featurePath);
-            if (stat.isDirectory() && file.indexOf('+') === 0) {
-                let featureName = file.substring(1);
-                let featureFiles = fs.readdirSync(featurePath);
-                let entryFile = featureFiles.find(f => {                   
-                    return f.indexOf(featureName + '.module.') !== -1 &&
-                        f.indexOf('.spec.') === -1;
-                });
-                if (!entryFile) {
-                    entryFile = featureFiles.find(f => {
-                        return f.indexOf('.module.') !== -1 &&
-                            f.indexOf('-routing.') === -1 &&
-                            f.indexOf('.spec.') === -1;
-                    });
-                }
-                if (!entryFile) {
-                    entryFile = featureFiles.indexOf('index.ts') !== -1 ? 'index.ts' : null;
-                }
-
-                if (entryFile) {
-                    let entryPath = path.posix.join(fusePath, file, entryFile);
-
-                    context.bundle.split(`**/${file}/**`, `${featureName} > ${entryPath}`);
-                } else {
-                    console.warn(`Unable to find entry file for feature folder at '${featurePath}. No split bundle added.`);
-                }
-            }
+            let feature = this.getFeatureInfoFromPath(file);
+            context.bundle.split(`${feature.path}/**`, `${feature.name} > ${file}`);
         }
     }
 
@@ -241,6 +223,18 @@ export class Ng2RouterPluginClass implements Plugin {
         return null;
     }
 
+    public getFeatureInfoFromPath(filePath: string) {
+        let lastIndex = filePath.lastIndexOf('+') + 1;
+        let feature = filePath.substr(lastIndex).split('/')[0];
+        if (!feature) {
+            throw new Error('Unable to determine feature name from \'' + filePath + '\'.');
+        }
+        return {
+            name: feature,
+            path: filePath.substr(0, lastIndex) + `${feature}`
+        };
+    }
+
     /**
      * Parses the loadChildren string for module information.
      * 
@@ -319,6 +313,12 @@ export interface Ng2RouterPluginOptions {
     loadChildrenPattern?: RegExp;
 
     /**
+     * Glob pattern for matching lazy module folders.
+     * Note that the appPath (or aotAppPath) is prefix to the pattern.
+     */
+    lazyModulePattern?: string;
+
+    /**
      * The test property for FuseBox plugins. Can be a regular expression or a string for a simplified regexp.
      * Defaults to '*.ts$|*.js$'.
      * 
@@ -360,3 +360,4 @@ export interface LazyModuleInfo {
      */
     moduleName?: string;
 }
+// glob('src/app/**/+*/!(*-route*|*-routing*).module.{ts,js}', (err, files) => { console.log(files); });> glob('src/app/**/+*/!(*-route*|*-routing*).module.{ts,js}', (err, files) => { console.log(files); });
